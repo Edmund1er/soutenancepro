@@ -1,183 +1,128 @@
-markdown
+# 🎓 SoutenancePro
 
-# SoutenancePro
+> **Plateforme de gestion des soutenances de fin d'études.**
 
-Plateforme de gestion des soutenances de fin d'etudes
+SoutenancePro est une application web moderne développée avec **Symfony** permettant aux établissements d'enseignement supérieur de gérer l'intégralité du processus de soutenance des mémoires.
 
-## Description
+---
 
-SoutenancePro est une application web developpee avec Symfony permettant aux etablissements d'enseignement superieur de gerer l'ensemble du processus de soutenance des memoires de fin d'etudes. L'application offre une interface complete pour les administrateurs et un espace dedie pour les enseignants.
+## 📋 Description
 
-## Fonctionnalites
+L'application offre une interface complète pour les administrateurs et un espace dédié pour les enseignants, facilitant la coordination entre les étudiants, les jurys et l'administration.
 
-### Administrateur
+## ✨ Fonctionnalités
 
-- Gestion des etudiants (creation, modification, suppression, recherche)
-- Gestion des enseignants (creation, modification, suppression, recherche)
-- Gestion des salles (creation, modification, suppression)
-- Gestion des soutenances (programmation, modification, annulation, recherche par date)
-- Tableau de bord avec statistiques et graphiques
-- Verification automatique des conflits de planning (intervalle d'une heure)
-- Pagination (6 elements par page)
-- Interface responsive avec template AblePro
+### 👨‍💼 Espace Administrateur
+- **Gestion des Étudiants** : Création, modification, suppression et recherche.
+- **Gestion des Enseignants** : Gestion complète du corps professoral.
+- **Gestion des Salles** : Optimisation de l'occupation des locaux.
+- **Gestion des Soutenances** : Programmation intelligente avec **vérification automatique des conflits** (intervalle d'une heure).
+- **Dashboard** : Statistiques et graphiques interactifs.
+- **Pagination** : Navigation fluide (6 éléments par page).
 
-### Enseignant
+### 👨‍🏫 Espace Enseignant
+- **Dashboard Personnalisé** : Vue d'ensemble de ses activités.
+- **Mes Soutenances** : Consultation des rôles (Président, Rapporteur, Examinateur).
+- **Composition des Jurys** : Détails complets sur les membres du jury.
+- **Pagination** : Optimisée pour la consultation (5 éléments par page).
 
-- Tableau de bord personnalise avec statistiques
-- Consultation de ses soutenances (president, rapporteur, examinateur)
-- Consultation de la composition des jurys
-- Pagination (5 elements par page)
+---
 
-## Technologies utilisees
+## 🛠️ Technologies Utilisées
 
-- Symfony 6.4
-- PHP 8.2
-- Doctrine ORM
-- MySQL 8.0
-- Twig
-- Bootstrap 4 (AblePro)
-- Chart.js / ApexCharts
-- FontAwesome
+- ![Symfony](https://img.shields.io/badge/Symfony-6.4-black?style=flat-square&logo=symfony)
+- ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php)
+- ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql)
+- **Frontend** : Twig, Bootstrap 4 (AblePro), Chart.js, FontAwesome.
 
-## Installation
+---
 
-### Pre-requis
+## 🚀 Installation
 
-- PHP 8.2 ou superieur
-- Composer
-- MySQL 8.0
-- Symfony CLI (optionnel)
+### 📋 Pré-requis
+- [PHP 8.2+](https://www.php.net/downloads)
+- [Composer](https://getcomposer.org/)
+- [MySQL 8.0+](https://dev.mysql.com/downloads/)
+- [Symfony CLI](https://symfony.com/download) (optionnel)
 
-### Etapes d'installation
+### 🛠️ Étapes d'installation
 
-1. Cloner le projet
+1. **Cloner le projet**
+   ```bash
+   git clone https://github.com/votre-pseudo/soutenancepro.git
+   cd soutenancepro
+   ```
 
-```bash
-git clone https://github.com/Edmund1er/soutenancepro.git
-cd soutenance-pro
+2. **Installer les dépendances**
+   ```bash
+   composer install
+   ```
 
-    Installer les dependances
+3. **Configurer l'environnement**
+   Copiez le fichier `.env` pour créer votre configuration locale :
+   ```bash
+   cp .env .env.dev
+   ```
+   Éditez ensuite le fichier `.env.dev` pour configurer votre base de données :
+   ```text
+   DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/soutenancepro?serverVersion=8.0"
+   ```
 
-bash
+4. **Initialiser la base de données**
+   ```bash
+   php bin/console doctrine:database:create
+   php bin/console doctrine:migrations:migrate --no-interaction
+   php bin/console doctrine:fixtures:load --no-interaction
+   ```
 
-composer install
+5. **Lancer le serveur**
+   ```bash
+   symfony server:start
+   ```
+   *Ou avec PHP directement :*
+   ```bash
+   php -S 127.0.0.1:8000 -t public
+   ```
 
-    Configurer la base de donnees
+---
 
-Copier le fichier .env et modifier les identifiants de connexion MySQL :
-bash
+## 🔐 Accès par Défaut
 
-cp .env .env.local
+| Rôle | Email | Mot de passe |
+| :--- | :--- | :--- |
+| **Administrateur** | `admin@soutenancepro.com` | `admin123` |
+| **Enseignant** | `jean.dupont@email.com` | `password123` |
 
-Modifier la variable DATABASE_URL :
-text
+---
 
-DATABASE_URL="mysql://utilisateur:motdepasse@127.0.0.1:3306/soutenancepro?serverVersion=8.0"
+## 📁 Structure du Projet
 
-    Creer la base de donnees
-
-bash
-
-php bin/console doctrine:database:create
-
-    Executer les migrations
-
-bash
-
-php bin/console doctrine:migrations:migrate
-
-    Charger les donnees de test (fixtures)
-
-bash
-
-php bin/console doctrine:fixtures:load
-
-    Demarrer le serveur
-
-bash
-
-symfony server:start
-
-ou
-bash
-
-php -S 127.0.0.1:8000 -t public
-
-Acces par defaut
-Role	Email	Mot de passe
-Administrateur	admin@soutenancepro.com	admin123
-Enseignant	jean.dupont@email.com	password123
-Structure du projet
-text
-
-soutenance-pro/
+```text
+soutenancepro/
 ├── src/
-│   ├── Controller/
-│   │   ├── Admin/
-│   │   │   ├── EtudiantController.php
-│   │   │   ├── EnseignantController.php
-│   │   │   ├── SalleController.php
-│   │   │   └── SoutenanceController.php
-│   │   ├── Enseignant/
-│   │   │   └── EnseignantDashboardController.php
-│   │   ├── HomeController.php
-│   │   └── SecurityController.php
-│   ├── Entity/
-│   │   ├── User.php
-│   │   ├── Etudiant.php
-│   │   ├── Enseignant.php
-│   │   ├── Salle.php
-│   │   └── Soutenance.php
-│   ├── Form/
-│   │   ├── EtudiantType.php
-│   │   ├── EnseignantType.php
-│   │   ├── SalleType.php
-│   │   └── SoutenanceType.php
-│   └── DataFixtures/
-│       └── AppFixtures.php
-├── templates/
-│   ├── admin/
-│   │   ├── dashboard.html.twig
-│   │   ├── etudiant/
-│   │   ├── enseignant/
-│   │   ├── salle/
-│   │   └── soutenance/
-│   ├── enseignant_ui/
-│   │   ├── dashboard.html.twig
-│   │   ├── mes_soutenances.html.twig
-│   │   └── mes_jurys.html.twig
-│   ├── home/
-│   │   └── index.html.twig
-│   └── security/
-│       └── login.html.twig
-├── public/
-│   └── assets/
-│       ├── css/
-│       ├── js/
-│       └── images/
-├── config/
-├── migrations/
-└── composer.json
+│   ├── Controller/      # Logique de navigation (Admin & Enseignant)
+│   ├── Entity/          # Modèles de données (Soutenance, Salle, etc.)
+│   ├── Repository/      # Requêtes personnalisées
+│   └── DataFixtures/    # Jeu de données de test
+├── templates/           # Vues Twig (Thème AblePro)
+├── migrations/          # Historique de la base de données
+└── assets/              # Fichiers CSS et JavaScript
+```
 
-Regles de gestion
+---
 
-    Conflits de planning
+## ⚖️ Règles de Gestion
 
-        Une meme salle ne peut pas etre utilisee a la meme date et heure
+### 🚫 Conflits de planning
+- Une **salle** ne peut pas être occupée par deux soutenances simultanément.
+- Un **enseignant** ne peut pas siéger dans deux jurys différents sur le même créneau.
+- La vérification se fait sur un intervalle de **60 minutes**.
 
-        Un enseignant ne peut pas etre dans deux jurys different a la meme date et heure
+### 🛡️ Protections
+- On ne peut pas supprimer un **étudiant** s'il a une soutenance programmée.
+- On ne peut pas supprimer un **enseignant** s'il est membre d'un jury actif.
+- Les **salles** sont verrouillées tant qu'elles ont des réservations.
 
-        Verification sur un intervalle d'une heure
+---
 
-    Suppression protegee
-
-        Un etudiant ayant une soutenance ne peut pas etre supprime
-
-        Un enseignant membre d'un jury ne peut pas etre supprime
-
-        Une salle avec des soutenances programmees ne peut pas etre supprimee
-
-    Roles automatiques
-
-        Un enseignant cree recoit automatiquement le role ROLE_ENSEIGNANT
-
+© 2026 SoutenancePro - Tous droits réservés.

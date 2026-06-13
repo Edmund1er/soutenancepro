@@ -1,0 +1,17 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+    <div class="mb-3">
+        {{ form_label(form.code, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.code, {'attr': {'class': 'form-control', 'placeholder': 'ex: A101'}}) }}
+        {{ form_errors(form.code) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.capacite, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.capacite, {'attr': {'class': 'form-control', 'placeholder': 'Nombre de places'}}) }}
+        {{ form_errors(form.capacite) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.localisation, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'placeholder': 'Bâtiment, étage'}}) }}
+        {{ form_errors(form.localisation) }}
+    </div>
+{{ form_end(form) }}

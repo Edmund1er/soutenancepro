@@ -1,0 +1,177 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Gestion des enseignants{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Liste des enseignants</h5>
+                <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#newModal">
+                    <i class="feather icon-plus"></i> Nouvel enseignant
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>NOM COMPLET</th>
+                                <th>EMAIL</th>
+                                <th>SPECIALITE</th>
+                                <th class="text-center">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for enseignant in pagination %}
+                            <tr>
+                                <td><strong>{{ enseignant.nom }} {{ enseignant.prenom }}</strong></td>
+                                <td>{{ enseignant.email }}</td>
+                                <td><span class="badge badge-success">{{ enseignant.specialite }}</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#showModal{{ enseignant.id }}" title="Voir">
+                                        <i class="feather icon-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal{{ enseignant.id }}" title="Modifier">
+                                        <i class="feather icon-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ enseignant.id }}" title="Supprimer">
+                                        <i class="feather icon-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Aucun enseignant inscrit</td>
+                            </tr>                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if totalPages > 1 %}
+                <div class="row mt-3">
+                    <div class="col-sm-12">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page > 1 %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_enseignant_index', {page: page-1}) }}">Precedent</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Precedent</span></li>
+                                {% endif %}
+
+                                {% for p in 1..totalPages %}
+                                    <li class="page-item {{ p == page ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ path('app_enseignant_index', {page: p}) }}">{{ p }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% if page < totalPages %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_enseignant_index', {page: page+1}) }}">Suivant</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for enseignant in pagination %}
+    <!-- MODAL VOIR -->
+    <div class="modal fade" id="showModal{{ enseignant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Details de l'enseignant</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless m-0">
+                            <tbody>
+                                <tr><th class="text-muted" style="width: 40%">NOM COMPLET :</th><td class="font-weight-bold">{{ enseignant.nom }} {{ enseignant.prenom }}</td></tr>
+                                <tr><th class="text-muted">EMAIL :</th><td>{{ enseignant.email }}</td></tr>
+                                <tr><th class="text-muted">SPECIALITE :</th><td><span class="badge badge-success">{{ enseignant.specialite }}</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MODIFIER -->
+    <div class="modal fade" id="editModal{{ enseignant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">Modifier l'enseignant</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                {{ form_start(editForms[enseignant.id]) }}
+                <div class="modal-body">
+                    {{ form_widget(editForms[enseignant.id]) }}
+                    <small class="text-muted">Laissez le mot de passe vide pour ne pas le modifier</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Enregistrer</button>
+                </div>
+                {{ form_end(editForms[enseignant.id]) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUPPRIMER AVEC CSRF TOKEN -->
+    <div class="modal fade" id="deleteModal{{ enseignant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="feather icon-alert-triangle" style="font-size: 48px;"></i>
+                    <p class="mt-3">Supprimer <strong>{{ enseignant.nom }} {{ enseignant.prenom }}</strong> ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('app_enseignant_delete', {'id': enseignant.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ enseignant.id) }}">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- MODAL AJOUT -->
+<div class="modal fade" id="newModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Ajouter un enseignant</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            {{ form_start(form) }}
+            <div class="modal-body">
+                {{ form_widget(form) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

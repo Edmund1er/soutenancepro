@@ -1,0 +1,154 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Tableau de bord Enseignant{% endblock %}
+
+{% block body %}
+<!-- [ breadcrumb ] start -->
+<div class="page-header">
+    <div class="page-block">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <div class="page-header-title">
+                    <h5 class="m-b-10">Dashboard Enseignant</h5>
+                </div>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('enseignant_dashboard') }}"><i class="feather icon-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#!">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- [ breadcrumb ] end -->
+
+<!-- [ Main Content ] start -->
+<div class="row">
+    <!-- Carte 1: Total soutenances -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-c-blue order-card">
+            <div class="card-body">
+                <h6 class="text-white">Total soutenances</h6>
+                <h2 class="text-right text-white">
+                    <i class="feather icon-calendar float-left"></i>
+                    <span>{{ stats.total|default(0) }}</span>
+                </h2>
+                <p class="m-b-0 text-white">Toutes soutenances confondues</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Carte 2: Soutenances à venir -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-c-green order-card">
+            <div class="card-body">
+                <h6 class="text-white">À venir</h6>
+                <h2 class="text-right text-white">
+                    <i class="feather icon-clock float-left"></i>
+                    <span>{{ stats.aVenir|default(0) }}</span>
+                </h2>
+                <p class="m-b-0 text-white">Soutenances programmees</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Carte 3: Soutenances aujourd'hui -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-c-yellow order-card">
+            <div class="card-body">
+                <h6 class="text-white">Aujourd'hui</h6>
+                <h2 class="text-right text-white">
+                    <i class="feather icon-sun float-left"></i>
+                    <span>{{ stats.aujourdhui|default(0) }}</span>
+                </h2>
+                <p class="m-b-0 text-white">Soutenances aujourd'hui</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Carte 4: Soutenances passées -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card bg-c-red order-card">
+            <div class="card-body">
+                <h6 class="text-white">Passees</h6>
+                <h2 class="text-right text-white">
+                    <i class="feather icon-check-circle float-left"></i>
+                    <span>{{ stats.passees|default(0) }}</span>
+                </h2>
+                <p class="m-b-0 text-white">Soutenances realisees</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mes soutenances recentes (max 4) -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Mes soutenances recentes</h5>
+                <div class="card-header-right">
+                    <div class="btn-group card-option">
+                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="feather icon-more-horizontal"></i>
+                        </button>
+                        <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                            <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                            <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> collapse</span><span style="display:none"><i class="feather icon-plus"></i> expand</span></a></li>
+                            <li class="dropdown-item reload-card"><a href="#!"><i class="feather icon-refresh-cw"></i> reload</a></li>
+                            <li class="dropdown-item close-card"><a href="#!"><i class="feather icon-trash"></i> remove</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>ETUDIANT</th>
+                                <th>THEME</th>
+                                <th>DATE</th>
+                                <th>HEURE</th>
+                                <th>SALLE</th>
+                                <th>MON ROLE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for soutenance in soutenances %}
+                            <tr>
+                                <td><strong>{{ soutenance.etudiant.nom }} {{ soutenance.etudiant.prenom }}</strong></td>
+                                <td>{{ soutenance.etudiant.themeMemoire|slice(0, 50) }}{% if soutenance.etudiant.themeMemoire|length > 50 %}...{% endif %}</td>
+                                <td>{{ soutenance.date|date('d/m/Y') }}</td>
+                                <td>{{ soutenance.heure|date('H:i') }}</td>
+                                <td>{{ soutenance.salle.code }} ({{ soutenance.salle.capacite }} pl.)</small></td>
+                                <td>
+                                    {% if soutenance.president and soutenance.president.id == app.user.id %}
+                                        <span class="badge badge-danger">President</span>
+                                    {% elseif soutenance.rapporteur and soutenance.rapporteur.id == app.user.id %}
+                                        <span class="badge badge-warning">Rapporteur</span>
+                                    {% elseif soutenance.examinateur and soutenance.examinateur.id == app.user.id %}
+                                        <span class="badge badge-info">Examinateur</span>
+                                    {% endif %}
+                                </small></td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    Aucune soutenance pour le moment
+                                </small></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-right">
+                <a href="{{ path('enseignant_mes_soutenances') }}" class="text-primary">
+                    Voir toutes mes soutenances <i class="feather icon-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.date, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.date) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.heure, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.heure, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.heure) }}
+        </div>
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.etudiant, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.etudiant, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.etudiant) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.salle, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.salle, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.salle) }}
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form_label(form.president, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.president, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.president) }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form_label(form.rapporteur, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.rapporteur, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.rapporteur) }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form_label(form.examinateur, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+            {{ form_widget(form.examinateur, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.examinateur) }}
+        </div>
+    </div>
+{{ form_end(form) }}

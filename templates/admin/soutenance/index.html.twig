@@ -1,0 +1,234 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Gestion des soutenances{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Liste des soutenances</h5>
+                <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#newModal">
+                    <i class="feather icon-plus"></i> Programmer
+                </button>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <input type="date" name="search_date" class="form-control" value="{{ searchDate }}">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="feather icon-search"></i> Filtrer
+                                    </button>
+                                    {% if searchDate %}
+                                        <a href="{{ path('app_soutenance_index') }}" class="btn btn-secondary">
+                                            <i class="feather icon-x"></i> Reinitialiser
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>ETUDIANT</th>
+                                <th>DATE</th>
+                                <th>HEURE</th>
+                                <th>SALLE</th>
+                                <th>PRESIDENT</th>
+                                <th class="text-center">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for soutenance in pagination %}
+                            <tr>
+                                <td><strong>{{ soutenance.etudiant.nom }} {{ soutenance.etudiant.prenom }}</strong></td>
+                                <td>{{ soutenance.date|date('d/m/Y') }}</td>
+                                <td>{{ soutenance.heure|date('H:i') }}</td>
+                                <td><span class="badge badge-info">{{ soutenance.salle.code }}</span> ({{ soutenance.salle.capacite }} pl.)</td>
+                                <td>{{ soutenance.president.nom }} {{ soutenance.president.prenom }}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#showModal{{ soutenance.id }}" title="Voir">
+                                        <i class="feather icon-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal{{ soutenance.id }}" title="Modifier">
+                                        <i class="feather icon-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ soutenance.id }}" title="Supprimer">
+                                        <i class="feather icon-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Aucune soutenance programmee</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if totalPages > 1 %}
+                <div class="row mt-3">
+                    <div class="col-sm-12">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page > 1 %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_soutenance_index', {page: page-1, search_date: searchDate}) }}">Precedent</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Precedent</span></li>
+                                {% endif %}
+
+                                {% for p in 1..totalPages %}
+                                    <li class="page-item {{ p == page ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ path('app_soutenance_index', {page: p, search_date: searchDate}) }}">{{ p }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% if page < totalPages %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_soutenance_index', {page: page+1, search_date: searchDate}) }}">Suivant</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for soutenance in pagination %}
+    <!-- MODAL VOIR -->
+    <div class="modal fade" id="showModal{{ soutenance.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Details de la soutenance</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2">ETUDIANT</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless m-0">
+                                    <tbody>
+                                        <tr><th class="text-muted" style="width: 40%">Nom :</th><td class="font-weight-bold">{{ soutenance.etudiant.nom }} {{ soutenance.etudiant.prenom }}</td></tr>
+                                        <tr><th class="text-muted">Filiere :</th><td>{{ soutenance.etudiant.filiere }}</td></tr>
+                                        <tr><th class="text-muted">Theme :</th><td>{{ soutenance.etudiant.themeMemoire|slice(0, 80) }}...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2">INFOS PRATIQUES</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless m-0">
+                                    <tbody>
+                                        <tr><th class="text-muted" style="width: 40%">Date :</th><td>{{ soutenance.date|date('d/m/Y') }}</td></tr>
+                                        <tr><th class="text-muted">Heure :</th><td>{{ soutenance.heure|date('H:i') }}</td></tr>
+                                        <tr><th class="text-muted">Salle :</th><td>{{ soutenance.salle.code }} - {{ soutenance.salle.localisation }}</td></tr>
+                                        <tr><th class="text-muted">Capacite :</th><td>{{ soutenance.salle.capacite }} places</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <h6 class="border-bottom pb-2">JURY DE SOUTENANCE</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="thead-light"><tr><th>Role</th><th>Nom</th><th>Specialite</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="font-weight-bold">President</td><td>{{ soutenance.president.nom }} {{ soutenance.president.prenom }}</td><td>{{ soutenance.president.specialite }}</td></tr>
+                                        {% if soutenance.rapporteur %}<tr><td class="font-weight-bold">Rapporteur</td><td>{{ soutenance.rapporteur.nom }} {{ soutenance.rapporteur.prenom }}</td><td>{{ soutenance.rapporteur.specialite }}</td></tr>{% endif %}
+                                        {% if soutenance.examinateur %}<tr><td class="font-weight-bold">Examinateur</td><td>{{ soutenance.examinateur.nom }} {{ soutenance.examinateur.prenom }}</td><td>{{ soutenance.examinateur.specialite }}</td></tr>{% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MODIFIER -->
+    <div class="modal fade" id="editModal{{ soutenance.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">Modifier la soutenance</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                {{ form_start(editForms[soutenance.id]) }}
+                <div class="modal-body">
+                    {{ form_widget(editForms[soutenance.id]) }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Enregistrer</button>
+                </div>
+                {{ form_end(editForms[soutenance.id]) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUPPRIMER AVEC CSRF TOKEN -->
+    <div class="modal fade" id="deleteModal{{ soutenance.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="feather icon-alert-triangle" style="font-size: 48px;"></i>
+                    <p class="mt-3">Annuler la soutenance de <strong>{{ soutenance.etudiant.nom }} {{ soutenance.etudiant.prenom }}</strong> ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Non</button>
+                    <form method="post" action="{{ path('app_soutenance_delete', {'id': soutenance.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ soutenance.id) }}">
+                        <button type="submit" class="btn btn-danger">Oui, annuler</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- MODAL AJOUT -->
+<div class="modal fade" id="newModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Programmer une soutenance</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            {{ form_start(form) }}
+            <div class="modal-body">
+                {{ form_widget(form) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Programmer</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

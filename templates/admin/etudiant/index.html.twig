@@ -1,0 +1,230 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Gestion des etudiants{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Liste des etudiants</h5>
+                <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#newModal">
+                    <i class="feather icon-plus"></i> Nouvel etudiant
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- BARRE DE RECHERCHE -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <form method="get" class="form-inline">
+                            <div class="input-group w-100">
+                                <input type="text" name="search" class="form-control" placeholder="Rechercher par nom, prenom, email ou filiere..." value="{{ search }}">
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="feather icon-search"></i> Rechercher
+                                    </button>
+                                    {% if search %}
+                                        <a href="{{ path('app_etudiant_index') }}" class="btn btn-secondary">
+                                            <i class="feather icon-x"></i> Reinitialiser
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        {% if search %}
+                            <span class="text-muted">
+                                <i class="feather icon-filter"></i> Resultats pour : "{{ search }}"
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- FIN BARRE DE RECHERCHE -->
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>NOM COMPLET</th>
+                                <th>EMAIL</th>
+                                <th>FILIERE</th>
+                                <th>THEME MEMOIRE</th>
+                                <th class="text-center">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for etudiant in pagination %}
+                            <tr>
+                                <td><strong>{{ etudiant.nom }} {{ etudiant.prenom }}</strong></td>
+                                <td>{{ etudiant.email }}</td>
+                                <td><span class="badge badge-primary">{{ etudiant.filiere }}</span></td>
+                                <td>{{ etudiant.themeMemoire|slice(0, 60) }}{% if etudiant.themeMemoire|length > 60 %}...{% endif %}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#showModal{{ etudiant.id }}" title="Voir">
+                                        <i class="feather icon-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editModal{{ etudiant.id }}" title="Modifier">
+                                        <i class="feather icon-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ etudiant.id }}" title="Supprimer">
+                                        <i class="feather icon-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    {% if search %}
+                                        Aucun etudiant ne correspond a la recherche "{{ search }}"
+                                    {% else %}
+                                        Aucun etudiant inscrit
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if totalPages > 1 %}
+                <div class="row mt-3">
+                    <div class="col-sm-12">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                {% if page > 1 %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_etudiant_index', {page: page-1, search: search}) }}">Precedent</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Precedent</span></li>
+                                {% endif %}
+
+                                {% for p in 1..totalPages %}
+                                    <li class="page-item {{ p == page ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ path('app_etudiant_index', {page: p, search: search}) }}">{{ p }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% if page < totalPages %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('app_etudiant_index', {page: page+1, search: search}) }}">Suivant</a></li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Affichage du nombre de resultats -->
+                {% if search and pagination|length > 0 %}
+                    <div class="row mt-2">
+                        <div class="col-sm-12 text-center">
+                            <small class="text-muted">
+                                {{ pagination|length }} resultat(s) trouve(s) pour "{{ search }}"
+                            </small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS (inchangées, voir fichier precedent) -->
+{% for etudiant in pagination %}
+    <!-- MODAL VOIR -->
+    <div class="modal fade" id="showModal{{ etudiant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Details de l'etudiant</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless m-0">
+                            <tbody>
+                                <tr><th class="text-muted" style="width: 40%">NOM COMPLET :</th><td class="font-weight-bold">{{ etudiant.nom }} {{ etudiant.prenom }}</td></tr>
+                                <tr><th class="text-muted">EMAIL :</th><td>{{ etudiant.email }}</td></tr>
+                                <tr><th class="text-muted">FILIERE :</th><td><span class="badge badge-primary">{{ etudiant.filiere }}</span></td></tr>
+                                <tr><th class="text-muted">THEME MEMOIRE :</th><td>{{ etudiant.themeMemoire }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MODIFIER -->
+    <div class="modal fade" id="editModal{{ etudiant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">Modifier l'etudiant</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                {{ form_start(editForms[etudiant.id], {'attr': {'novalidate': 'novalidate'}}) }}
+                <div class="modal-body">
+                    {{ form_widget(editForms[etudiant.id]) }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">Enregistrer</button>
+                </div>
+                {{ form_end(editForms[etudiant.id]) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUPPRIMER -->
+    <div class="modal fade" id="deleteModal{{ etudiant.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="feather icon-alert-triangle" style="font-size: 48px;"></i>
+                    <p class="mt-3">Supprimer <strong>{{ etudiant.nom }} {{ etudiant.prenom }}</strong> ?</p>
+                    <p class="text-danger small">Cette action est irreversible</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('app_etudiant_delete', {'id': etudiant.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ etudiant.id) }}">
+                        <input type="hidden" name="page" value="{{ page }}">
+                        <input type="hidden" name="search" value="{{ search }}">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- MODAL AJOUT -->
+<div class="modal fade" id="newModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Ajouter un etudiant</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="modal-body">
+                {{ form_widget(form) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

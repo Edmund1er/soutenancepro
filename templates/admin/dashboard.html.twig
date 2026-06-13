@@ -1,0 +1,438 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Dashboard Analytics{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<!-- ApexCharts CDN -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // ========== DONNÉES RÉELLES DEPUIS LA BDD ==========
+    var soutenancesData = {{ stats.soutenancesParJour|json_encode|raw }};
+    var joursLabels = {{ stats.joursLabels|json_encode|raw }};
+    
+    console.log("Données des soutenances par jour:", soutenancesData);
+    console.log("Jours:", joursLabels);
+    
+    // Graphique 1: Support chart (courbe mini pour Total Étudiants)
+    var supportChartElement = document.querySelector("#support-chart");
+    if(supportChartElement && typeof ApexCharts !== 'undefined') {
+        var options = {
+            chart: { height: 80, type: 'area', toolbar: { show: false }, sparkline: { enabled: true } },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            series: [{ name: 'Évolution', data: soutenancesData }],
+            colors: ['#4680ff'],
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0 } },
+            tooltip: { y: { formatter: function(val) { return val + ' soutenances'; } } }
+        };
+        new ApexCharts(supportChartElement, options).render();
+    }
+    
+    // Graphique 2: Support chart 1 (courbe mini pour Total Enseignants)
+    var supportChart1Element = document.querySelector("#support-chart1");
+    if(supportChart1Element && typeof ApexCharts !== 'undefined') {
+        var options2 = {
+            chart: { height: 80, type: 'area', toolbar: { show: false }, sparkline: { enabled: true } },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            series: [{ name: 'Évolution', data: soutenancesData }],
+            colors: ['#10b981'],
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0 } },
+            tooltip: { y: { formatter: function(val) { return val + ' soutenances'; } } }
+        };
+        new ApexCharts(supportChart1Element, options2).render();
+    }
+
+    // Graphique 3: Évolution des soutenances (grand graphique ligne)
+    var evolutionChartElement = document.querySelector("#soutenances-evolution-chart");
+    if(evolutionChartElement && typeof ApexCharts !== 'undefined') {
+        var evolutionOptions = {
+            chart: { 
+                type: 'line', 
+                height: 350, 
+                toolbar: { show: true }, 
+                zoom: { enabled: false },
+                background: 'transparent'
+            },
+            series: [{ 
+                name: 'Soutenances', 
+                data: soutenancesData,
+                type: 'line'
+            }],
+            xaxis: { 
+                categories: joursLabels, 
+                title: { text: 'Jours de la semaine', style: { fontSize: '12px' } }
+            },
+            yaxis: { 
+                title: { text: 'Nombre de soutenances', style: { fontSize: '12px' } },
+                min: 0,
+                tickAmount: 5
+            },
+            stroke: { 
+                curve: 'smooth', 
+                width: 3,
+                colors: ['#4680ff']
+            },
+            colors: ['#4680ff'],
+            markers: { 
+                size: 5, 
+                colors: ['#4680ff'], 
+                strokeColors: '#fff', 
+                strokeWidth: 2,
+                hover: { size: 7 }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'light',
+                    type: 'horizontal',
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#10b981'],
+                    inverseColors: true,
+                    opacityFrom: 0.8,
+                    opacityTo: 0.2,
+                    stops: [0, 50, 100]
+                }
+            },
+            tooltip: { 
+                theme: 'dark',
+                y: { formatter: function(val) { return val + ' soutenances'; } },
+                x: { formatter: function(val) { return val; } }
+            },
+            grid: {
+                borderColor: '#e0e0e0',
+                row: { colors: ['#f8f9fa', 'transparent'], opacity: 0.3 },
+                padding: { top: 10, right: 10, bottom: 10, left: 10 }
+            },
+            title: {
+                text: 'Évolution quotidienne',
+                align: 'left',
+                style: { fontSize: '14px', fontWeight: '500', color: '#666' }
+            }
+        };
+        new ApexCharts(evolutionChartElement, evolutionOptions).render();
+    }
+    
+    // Graphique 4: Mini courbe pour la carte des salles (optionnel)
+    var sallesChartElement = document.querySelector("#salles-chart");
+    if(sallesChartElement && typeof ApexCharts !== 'undefined') {
+        var sallesOptions = {
+            chart: { height: 60, type: 'area', toolbar: { show: false }, sparkline: { enabled: true } },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 1.5 },
+            series: [{ name: 'Occupation', data: [65, 70, 55, 80, 75, 85, 90] }],
+            colors: ['#ffba57'],
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0 } }
+        };
+        new ApexCharts(sallesChartElement, sallesOptions).render();
+    }
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<!-- [ breadcrumb ] start -->
+<div class="page-header">
+    <div class="page-block">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <div class="page-header-title">
+                    <h5 class="m-b-10">Dashboard Analytics</h5>
+                </div>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}"><i class="feather icon-home"></i></a></li>
+                    <li class="breadcrumb-item"><a href="#!">Dashboard Analytics</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- [ breadcrumb ] end -->
+
+<!-- [ Main Content ] start -->
+<div class="row">
+    <!-- support-section start -->
+    <div class="col-lg-7 col-md-12">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card support-bar overflow-hidden">
+                    <div class="card-body pb-0">
+                        <h2 class="m-0">{{ stats.etudiants|default(0) }}</h2>
+                        <span class="text-c-blue">Total Étudiants</span>
+                        <p class="mb-3 mt-3">Nombre total d'étudiants inscrits</p>
+                    </div>
+                    <div id="support-chart"></div>
+                    <div class="card-footer bg-primary text-white">
+                        <div class="row text-center">
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.etudiantsActifs|default(stats.etudiants|default(0)) }}</h4>
+                                <span>Inscrits</span>
+                            </div>
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.etudiantsAttente|default(0) }}</h4>
+                                <span>En attente</span>
+                            </div>
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.etudiantsDiplomes|default(0) }}</h4>
+                                <span>Diplômés</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card support-bar overflow-hidden">
+                    <div class="card-body pb-0">
+                        <h2 class="m-0">{{ stats.enseignants|default(0) }}</h2>
+                        <span class="text-c-green">Total Enseignants</span>
+                        <p class="mb-3 mt-3">Nombre total d'enseignants</p>
+                    </div>
+                    <div id="support-chart1"></div>
+                    <div class="card-footer bg-success text-white">
+                        <div class="row text-center">
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.enseignantsPermanents|default(stats.enseignants|default(0)) }}</h4>
+                                <span>Permanents</span>
+                            </div>
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.enseignantsVacataires|default(0) }}</h4>
+                                <span>Vacataires</span>
+                            </div>
+                            <div class="col">
+                                <h4 class="m-0 text-white">{{ stats.enseignantsInvites|default(0) }}</h4>
+                                <span>Invités</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- support-section end -->
+
+    <!-- page statustic card start -->
+    <div class="col-lg-5 col-md-12">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h4 class="text-c-yellow">{{ stats.salles|default(0) }}</h4>
+                                <h6 class="text-muted m-b-0">Salles disponibles</h6>
+                            </div>
+                            <div class="col-4 text-right">
+                                <i class="feather icon-home f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-c-yellow">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <p class="text-white m-b-0">Capacité totale: {{ stats.capaciteTotale|default(0) }} places</p>
+                            </div>
+                            <div class="col-3 text-right">
+                                <i class="feather icon-trending-up text-white f-16"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h4 class="text-c-green">{{ stats.soutenances|default(0) }}</h4>
+                                <h6 class="text-muted m-b-0">Soutenances</h6>
+                            </div>
+                            <div class="col-4 text-right">
+                                <i class="feather icon-calendar f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-c-green">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <p class="text-white m-b-0">{{ stats.soutenancesMois|default(0) }} programmées ce mois</p>
+                            </div>
+                            <div class="col-3 text-right">
+                                <i class="feather icon-trending-up text-white f-16"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h4 class="text-c-red">{{ stats.soutenancesAVenir|default(0) }}</h4>
+                                <h6 class="text-muted m-b-0">À venir</h6>
+                            </div>
+                            <div class="col-4 text-right">
+                                <i class="feather icon-clock f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-c-red">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <p class="text-white m-b-0">Prochaines soutenances</p>
+                            </div>
+                            <div class="col-3 text-right">
+                                <i class="feather icon-trending-down text-white f-16"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h4 class="text-c-blue">{{ stats.tauxReussite|default(0) }}%</h4>
+                                <h6 class="text-muted m-b-0">Taux réussite</h6>
+                            </div>
+                            <div class="col-4 text-right">
+                                <i class="feather icon-thumbs-up f-28"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-c-blue">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <p class="text-white m-b-0">↑ +{{ stats.progressionReussite|default(0) }}%</p>
+                            </div>
+                            <div class="col-3 text-right">
+                                <i class="feather icon-trending-up text-white f-16"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- page statustic card end -->
+
+    <!-- DERNIERS ÉTUDIANTS INSCRITS -->
+    <div class="col-xl-6 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5> Derniers étudiants inscrits</h5>
+                <div class="card-header-right">
+                    <div class="btn-group card-option">
+                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="feather icon-more-horizontal"></i>
+                        </button>
+                        <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                            <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                            <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> collapse</span><span style="display:none"><i class="feather icon-plus"></i> expand</span></a></li>
+                            <li class="dropdown-item reload-card"><a href="#!"><i class="feather icon-refresh-cw"></i> reload</a></li>
+                            <li class="dropdown-item close-card"><a href="#!"><i class="feather icon-trash"></i> remove</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>NOM & PRÉNOM</th>
+                                <th>EMAIL</th>
+                                <th>FILIÈRE</th>
+                                <th>THÈME MÉMOIRE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for etudiant in derniersEtudiants|slice(0, 5) %}
+                            <tr>
+                                <td class="font-weight-bold">{{ etudiant.nom }} {{ etudiant.prenom }}</td>
+                                <td>{{ etudiant.email }}</td>
+                                <td><span class="badge badge-light-primary">{{ etudiant.filiere }}</span></td>
+                                <td>{{ etudiant.themeMemoire|slice(0, 50) }}{% if etudiant.themeMemoire|length > 50 %}...{% endif %}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">Aucun étudiant inscrit</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-right">
+                <a href="{{ path('app_etudiant_index') }}" class="text-primary">Voir tous les étudiants <i class="feather icon-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Évolution des soutenances - GRANDE COURBE -->
+    <div class="col-xl-6 col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5> Évolution des soutenances</h5>
+                <div class="card-header-right">
+                    <div class="btn-group card-option">
+                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="feather icon-more-horizontal"></i>
+                        </button>
+                        <ul class="list-unstyled card-option dropdown-menu dropdown-menu-right">
+                            <li class="dropdown-item full-card"><a href="#!"><span><i class="feather icon-maximize"></i> maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+                            <li class="dropdown-item minimize-card"><a href="#!"><span><i class="feather icon-minus"></i> collapse</span><span style="display:none"><i class="feather icon-plus"></i> expand</span></a></li>
+                            <li class="dropdown-item reload-card"><a href="#!"><i class="feather icon-refresh-cw"></i> reload</a></li>
+                            <li class="dropdown-item close-card"><a href="#!"><i class="feather icon-trash"></i> remove</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="soutenances-evolution-chart" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+
+   <!-- Prochaines soutenances -->
+<div class="col-md-12">
+    <div class="card table-card">
+        <div class="card-header">
+            <h5> Prochaines soutenances (max 7)</h5>
+            ...
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Filière</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Salle</th>
+                            <th>Président</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for soutenance in prochainesSoutenances|slice(0, 7) %}  <!-- ← sécurisé à 7 -->
+                        <tr>
+                            <td class="font-weight-bold">{{ soutenance.etudiant.nom }} {{ soutenance.etudiant.prenom }}</td>
+                            <td>{{ soutenance.etudiant.filiere }}</td>
+                            <td>{{ soutenance.date|date('d/m/Y') }}</td>
+                            <td>{{ soutenance.heure|date('H:i') }}</td>
+                            <td><span class="badge badge-light-info">{{ soutenance.salle.code }}</span> ({{ soutenance.salle.capacite }} pl.)</td>
+                            <td>{{ soutenance.president.nom }} {{ soutenance.president.prenom }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="6" class="text-center">Aucune soutenance programmée</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

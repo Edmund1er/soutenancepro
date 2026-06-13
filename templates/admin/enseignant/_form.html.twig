@@ -1,0 +1,33 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+    <div class="mb-3">
+        {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom'}}) }}
+        {{ form_errors(form.nom) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.prenom, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+        {{ form_errors(form.prenom) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.email, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'email@exemple.com'}}) }}
+        {{ form_errors(form.email) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.password, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.password, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe'}}) }}
+        <small class="text-muted">Laisser vide pour conserver le mot de passe actuel</small>
+        {{ form_errors(form.password) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.specialite, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.specialite, {'attr': {'class': 'form-control', 'placeholder': 'Spécialité'}}) }}
+        {{ form_errors(form.specialite) }}
+    </div>
+    <div class="mb-3">
+        {{ form_label(form.roles, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+        {{ form_widget(form.roles, {'attr': {'class': 'form-control'}}) }}
+        <small class="text-muted">Format: ["ROLE_ENSEIGNANT"] ou ["ROLE_ADMIN"]</small>
+    </div>
+{{ form_end(form) }}

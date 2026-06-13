@@ -1,4 +1,4 @@
-# 🎓 SoutenancePro
+#  SoutenancePro
 
 > **Plateforme de gestion des soutenances de fin d'études.**
 
@@ -6,13 +6,13 @@ SoutenancePro est une application web moderne développée avec **Symfony** perm
 
 ---
 
-## 📋 Description
+## Description
 
 L'application offre une interface complète pour les administrateurs et un espace dédié pour les enseignants, facilitant la coordination entre les étudiants, les jurys et l'administration.
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-### 👨‍💼 Espace Administrateur
+###  Espace Administrateur
 - **Gestion des Étudiants** : Création, modification, suppression et recherche.
 - **Gestion des Enseignants** : Gestion complète du corps professoral.
 - **Gestion des Salles** : Optimisation de l'occupation des locaux.
@@ -20,7 +20,7 @@ L'application offre une interface complète pour les administrateurs et un espac
 - **Dashboard** : Statistiques et graphiques interactifs.
 - **Pagination** : Navigation fluide (6 éléments par page).
 
-### 👨‍🏫 Espace Enseignant
+###  Espace Enseignant
 - **Dashboard Personnalisé** : Vue d'ensemble de ses activités.
 - **Mes Soutenances** : Consultation des rôles (Président, Rapporteur, Examinateur).
 - **Composition des Jurys** : Détails complets sur les membres du jury.
@@ -28,7 +28,7 @@ L'application offre une interface complète pour les administrateurs et un espac
 
 ---
 
-## 🛠️ Technologies Utilisées
+##  Technologies Utilisées
 
 - ![Symfony](https://img.shields.io/badge/Symfony-6.4-black?style=flat-square&logo=symfony)
 - ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php)
@@ -37,15 +37,15 @@ L'application offre une interface complète pour les administrateurs et un espac
 
 ---
 
-## 🚀 Installation
+##  Installation
 
-### 📋 Pré-requis
+###  Pré-requis
 - [PHP 8.2+](https://www.php.net/downloads)
 - [Composer](https://getcomposer.org/)
 - [MySQL 8.0+](https://dev.mysql.com/downloads/)
 - [Symfony CLI](https://symfony.com/download) (optionnel)
 
-### 🛠️ Étapes d'installation
+###  Étapes d'installation
 
 1. **Cloner le projet**
    ```bash
@@ -86,7 +86,7 @@ L'application offre une interface complète pour les administrateurs et un espac
 
 ---
 
-## 🔐 Accès par Défaut
+##  Accès par Défaut
 
 | Rôle | Email | Mot de passe |
 | :--- | :--- | :--- |
@@ -95,7 +95,7 @@ L'application offre une interface complète pour les administrateurs et un espac
 
 ---
 
-## 📁 Structure du Projet
+##  Structure du Projet
 
 ```text
 soutenancepro/
@@ -111,18 +111,17 @@ soutenancepro/
 
 ---
 
-## ⚖️ Règles de Gestion
+##  Règles de Gestion
 
-### 🚫 Conflits de planning
+###  Conflits de planning
 - Une **salle** ne peut pas être occupée par deux soutenances simultanément.
 - Un **enseignant** ne peut pas siéger dans deux jurys différents sur le même créneau.
 - La vérification se fait sur un intervalle de **60 minutes**.
 
-### 🛡️ Protections
+###  Protections
 - On ne peut pas supprimer un **étudiant** s'il a une soutenance programmée.
 - On ne peut pas supprimer un **enseignant** s'il est membre d'un jury actif.
 - Les **salles** sont verrouillées tant qu'elles ont des réservations.
 
 ---
 
-© 2026 SoutenancePro - Tous droits réservés.

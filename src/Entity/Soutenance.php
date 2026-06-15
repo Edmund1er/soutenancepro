@@ -5,10 +5,14 @@ namespace App\Entity;
 use App\Repository\SoutenanceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use App\Validator as AppAssert;
+
 #[ORM\Entity(repositoryClass: SoutenanceRepository::class)]
-#[ORM\UniqueConstraint(name: "unique_etudiant", columns: ["etudiant_id"])]
+#[UniqueEntity('etudiant', message: 'Cet étudiant a déjà une soutenance programmée.')]
+#[AppAssert\NoSoutenanceCollision]
 class Soutenance
 {
     #[ORM\Id]
@@ -17,38 +21,36 @@ class Soutenance
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotBlank(message: 'La date est obligatoire.')]
-    #[Assert\GreaterThanOrEqual(value: 'today', message: 'La date doit être aujourd\'hui ou dans le futur.')]
+    #[Assert\NotNull(message: 'La date est obligatoire.')]
+    #[Assert\GreaterThanOrEqual('today', message: 'La date doit être aujourd\'hui ou dans le futur.')]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    #[Assert\NotBlank(message: 'L\'heure est obligatoire.')]
+    #[Assert\NotNull(message: 'L\'heure est obligatoire.')]
     private ?\DateTimeInterface $heure = null;
 
-    #[ORM\OneToOne(inversedBy: 'soutenance')]
+    #[ORM\OneToOne(inversedBy: 'soutenance', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'L\'étudiant est obligatoire.')]
+    #[Assert\NotNull(message: 'L\'étudiant est obligatoire.')]
     private ?Etudiant $etudiant = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'La salle est obligatoire.')]
+    #[Assert\NotNull(message: 'La salle est obligatoire.')]
     private ?Salle $salle = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'Le président est obligatoire.')]
+    #[Assert\NotNull(message: 'Le président du jury est obligatoire.')]
     private ?Enseignant $president = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'Le rapporteur est obligatoire.')]
     private ?Enseignant $rapporteur = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'L\'examinateur est obligatoire.')]
     private ?Enseignant $examinateur = null;
+
+    // Getters et Setters
 
     public function getId(): ?int
     {
@@ -82,7 +84,7 @@ class Soutenance
         return $this->etudiant;
     }
 
-    public function setEtudiant(Etudiant $etudiant): static
+    public function setEtudiant(?Etudiant $etudiant): static
     {
         $this->etudiant = $etudiant;
         return $this;
@@ -93,7 +95,7 @@ class Soutenance
         return $this->salle;
     }
 
-    public function setSalle(Salle $salle): static
+    public function setSalle(?Salle $salle): static
     {
         $this->salle = $salle;
         return $this;
@@ -104,7 +106,7 @@ class Soutenance
         return $this->president;
     }
 
-    public function setPresident(Enseignant $president): static
+    public function setPresident(?Enseignant $president): static
     {
         $this->president = $president;
         return $this;
@@ -115,7 +117,7 @@ class Soutenance
         return $this->rapporteur;
     }
 
-    public function setRapporteur(Enseignant $rapporteur): static
+    public function setRapporteur(?Enseignant $rapporteur): static
     {
         $this->rapporteur = $rapporteur;
         return $this;
@@ -126,7 +128,7 @@ class Soutenance
         return $this->examinateur;
     }
 
-    public function setExaminateur(Enseignant $examinateur): static
+    public function setExaminateur(?Enseignant $examinateur): static
     {
         $this->examinateur = $examinateur;
         return $this;

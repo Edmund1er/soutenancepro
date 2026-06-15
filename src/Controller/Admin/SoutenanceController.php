@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Enseignant;
 use App\Entity\Soutenance;
 use App\Form\SoutenanceType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,7 +28,9 @@ class SoutenanceController extends AbstractController
             ->leftJoin('s.etudiant', 'e')
             ->leftJoin('s.salle', 'sa')
             ->leftJoin('s.president', 'p')
-            ->addSelect('e', 'sa', 'p');
+            ->leftJoin('s.rapporteur', 'r')
+            ->leftJoin('s.examinateur', 'ex')
+            ->addSelect('e', 'sa', 'p', 'r', 'ex');
         
         if ($searchDate) {
             $date = \DateTime::createFromFormat('Y-m-d', $searchDate);
@@ -49,14 +52,12 @@ class SoutenanceController extends AbstractController
                          ->getQuery()
                          ->getResult();
         
-        // Formulaire d'ajout
         $soutenance = new Soutenance();
         $form = $this->createForm(SoutenanceType::class, $soutenance, [
             'action' => $this->generateUrl('app_soutenance_new'),
             'method' => 'POST'
         ]);
         
-        // Formulaires de modification
         $editForms = [];
         foreach ($pagination as $s) {
             $editForms[$s->getId()] = $this->createForm(SoutenanceType::class, $s, [
@@ -75,91 +76,6 @@ class SoutenanceController extends AbstractController
         ]);
     }
     
-    /**
-     * Verifie les collisions avec intervalle d'1 heure
-     */
-    private function checkCollisions(Soutenance $soutenance, EntityManagerInterface $entityManager, ?int $excludeId = null): ?string
-    {
-        $date = $soutenance->getDate();
-        $heure = $soutenance->getHeure();
-        $salle = $soutenance->getSalle();
-        $president = $soutenance->getPresident();
-        $rapporteur = $soutenance->getRapporteur();
-        $examinateur = $soutenance->getExaminateur();
-        
-        if (!$date || !$heure || !$salle || !$president) {
-            return 'Tous les champs obligatoires doivent etre remplis';
-        }
-        
-        $heureTimestamp = $heure->getTimestamp();
-        $heureDebut = (new \DateTime())->setTimestamp($heureTimestamp - 3600);
-        $heureFin = (new \DateTime())->setTimestamp($heureTimestamp + 3600);
-        
-        $repo = $entityManager->getRepository(Soutenance::class);
-        
-        $qb = $repo->createQueryBuilder('s')
-            ->where('s.date = :date')
-            ->andWhere('s.heure BETWEEN :heureDebut AND :heureFin')
-            ->setParameter('date', $date)
-            ->setParameter('heureDebut', $heureDebut)
-            ->setParameter('heureFin', $heureFin);
-        
-        if ($excludeId) {
-            $qb->andWhere('s.id != :id')
-               ->setParameter('id', $excludeId);
-        }
-        
-        // Collision salle
-        $collisionSalle = (clone $qb)
-            ->andWhere('s.salle = :salle')
-            ->setParameter('salle', $salle)
-            ->getQuery()
-            ->getOneOrNullResult();
-        
-        if ($collisionSalle) {
-            return 'Cette salle est deja occupee a cette date et heure';
-        }
-        
-        // Collision president
-        $collisionPresident = (clone $qb)
-            ->andWhere('s.president = :president')
-            ->setParameter('president', $president)
-            ->getQuery()
-            ->getOneOrNullResult();
-        
-        if ($collisionPresident) {
-            return 'Cet enseignant (president) est deja dans un jury a cette date et heure';
-        }
-        
-        // Collision rapporteur
-        if ($rapporteur) {
-            $collisionRapporteur = (clone $qb)
-                ->andWhere('s.rapporteur = :rapporteur')
-                ->setParameter('rapporteur', $rapporteur)
-                ->getQuery()
-                ->getOneOrNullResult();
-            
-            if ($collisionRapporteur) {
-                return 'Cet enseignant (rapporteur) est deja dans un jury a cette date et heure';
-            }
-        }
-        
-        // Collision examinateur
-        if ($examinateur) {
-            $collisionExaminateur = (clone $qb)
-                ->andWhere('s.examinateur = :examinateur')
-                ->setParameter('examinateur', $examinateur)
-                ->getQuery()
-                ->getOneOrNullResult();
-            
-            if ($collisionExaminateur) {
-                return 'Cet enseignant (examinateur) est deja dans un jury a cette date et heure';
-            }
-        }
-        
-        return null;
-    }
-    
     #[Route('/new', name: 'app_soutenance_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -168,17 +84,13 @@ class SoutenanceController extends AbstractController
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-            $error = $this->checkCollisions($soutenance, $entityManager);
-            if ($error) {
-                $this->addFlash('danger', $error);
-                return $this->redirectToRoute('app_soutenance_index');
-            }
-            
             $entityManager->persist($soutenance);
             $entityManager->flush();
-            $this->addFlash('success', 'Soutenance programmee avec succes');
+            $this->addFlash('success', 'Soutenance programmée avec succès');
         } else {
-            $this->addFlash('danger', 'Erreur lors de la programmation');
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
         
         return $this->redirectToRoute('app_soutenance_index');
@@ -191,31 +103,28 @@ class SoutenanceController extends AbstractController
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-            $error = $this->checkCollisions($soutenance, $entityManager, $soutenance->getId());
-            if ($error) {
-                $this->addFlash('danger', $error);
-                return $this->redirectToRoute('app_soutenance_index');
-            }
-            
             $entityManager->flush();
-            $this->addFlash('success', 'Soutenance modifiee avec succes');
+            $this->addFlash('success', 'Soutenance modifiée avec succès');
         } else {
-            $this->addFlash('danger', 'Erreur lors de la modification');
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
         
         return $this->redirectToRoute('app_soutenance_index');
     }
+
     
     #[Route('/{id}/delete', name: 'app_soutenance_delete', methods: ['POST'])]
     public function delete(Request $request, Soutenance $soutenance, EntityManagerInterface $entityManager): Response
     {
-        // Verification du token CSRF
         if (!$this->isCsrfTokenValid('delete' . $soutenance->getId(), $request->request->get('_token'))) {
             $this->addFlash('danger', 'Token de securite invalide.');
             return $this->redirectToRoute('app_soutenance_index');
         }
         
         try {
+            $etudiant = $soutenance->getEtudiant();
             $entityManager->remove($soutenance);
             $entityManager->flush();
             $this->addFlash('success', 'Soutenance annulee avec succes');

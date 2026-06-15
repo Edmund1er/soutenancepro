@@ -8,7 +8,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EtudiantRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
+#[UniqueEntity('email', message: 'Cet email est déjà utilisé.')]
 class Etudiant
 {
     #[ORM\Id]
@@ -18,10 +18,12 @@ class Etudiant
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    #[Assert\Length(min: 2, max: 100, minMessage: 'Le nom doit contenir au moins 2 caractères.')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
+    #[Assert\Length(min: 2, max: 100, minMessage: 'Le prénom doit contenir au moins 2 caractères.')]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -33,12 +35,14 @@ class Etudiant
     #[Assert\NotBlank(message: 'La filière est obligatoire.')]
     private ?string $filiere = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text')]
     #[Assert\NotBlank(message: 'Le thème du mémoire est obligatoire.')]
     private ?string $themeMemoire = null;
 
     #[ORM\OneToOne(mappedBy: 'etudiant', cascade: ['persist', 'remove'])]
     private ?Soutenance $soutenance = null;
+
+    // Getters et Setters
 
     public function getId(): ?int
     {
@@ -109,5 +113,10 @@ class Etudiant
     {
         $this->soutenance = $soutenance;
         return $this;
+    }
+
+    public function getNomComplet(): string
+    {
+        return $this->nom . ' ' . $this->prenom;
     }
 }
